@@ -1,17 +1,17 @@
 # style codes
-DIM="\033[2m"
-BOLD="\033[1m"
-BLINK="\033[5m"
+DIM="\[\e[2m\]"
+BOLD="\[\e[1m\]"
+BLINK="\[\e[5m\]"
 
-RED="\033[31m"
-BLUE="\033[34m"
-CYAN="\033[36m"
-GREY="\033[90m"
-GREEN="\033[32m"
-YELLOW="\033[33m"
-MAGENTA="\033[35m"
+RED="\[\e[31m\]"
+BLUE="\[\e[34m\]"
+CYAN="\[\e[36m\]"
+GREY="\[\e[90m\]"
+GREEN="\[\e[32m\]"
+YELLOW="\[\e[33m\]"
+MAGENTA="\[\e[35m\]"
 
-ENDSTYLE="\033[0m"
+ENDSTYLE="\[\e[0m\]"
 
 # safer move and copy
 alias mv='mv -i'
@@ -31,4 +31,3 @@ genpass () {
 	website=$1 ; stty -echo ; read -p "Password: " password ; echo ; stty echo
 	echo "$password$website" | sha1sum - | cut -d" " -f1 | xxd -r -p | base64 | tr -d -c [:alnum:] | xclip -selection c
 }
-
