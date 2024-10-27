@@ -44,7 +44,7 @@ function __custom_prompt {
 	# if running terminal in GUI
 	if [ "${TERM}\]" != "linux" ]; then			
 		# directory indicator
-		local DIRECTORY="$BLUE[$RED\w$BLUE]$ENDSTYLE"
+		local DIRECTORY="$BOLD$BLUE[$RED\w$BLUE]$ENDSTYLE"
 	
 		# directory badges
 		local GIT=$([[ $(__git_ps1) ]] && echo " $BOLD$YELLOW($(__git_ps1 '%s'))$ENDSTYLE")
