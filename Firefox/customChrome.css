@@ -1,0 +1,12 @@
+/* darken tab strip background and add padding */
+#TabsToolbar {
+	background-color: var(--gnome-window-background) !important;
+	padding-bottom: 5px !important;
+}
+
+/* make flexible space smaller */
+toolbar toolbarspring{
+  -moz-box-flex: 40 !important;
+  min-width: 10px !important;
+  max-width: 100px !important;
+}

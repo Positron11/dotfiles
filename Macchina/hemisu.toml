@@ -1,0 +1,26 @@
+# hide the distro art
+hide_ascii = true 
+
+# separator spacing and padding
+spacing = 2
+padding = 0
+
+# key and separator styles
+key_color = "Green"
+separator = "•"
+separator_color = "Red"
+
+[palette] # display terminal palette
+visible = true
+type = "Dark"
+
+[box] # box border style
+visible = true
+border = "rounded"
+
+[box.inner_margin] # box padding
+x = 2
+y = 1
+
+[keys] # shorten terminal key
+terminal = "Term"

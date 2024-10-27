@@ -1,0 +1,5 @@
+# keys to show
+show = ["Host", "Machine", "Kernel", "Distribution", "OperatingSystem", "DesktopEnvironment", "WindowManager", "Terminal", "Uptime"]
+
+# style theme
+theme = "hemisu"

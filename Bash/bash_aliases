@@ -1,0 +1,34 @@
+# style codes
+DIM="\033[2m"
+BOLD="\033[1m"
+BLINK="\033[5m"
+
+RED="\033[31m"
+BLUE="\033[34m"
+CYAN="\033[36m"
+GREY="\033[90m"
+GREEN="\033[32m"
+YELLOW="\033[33m"
+MAGENTA="\033[35m"
+
+ENDSTYLE="\033[0m"
+
+# safer move and copy
+alias mv='mv -i'
+alias cp='cp -i'
+
+# sort files by size, display human readable format
+alias lt='ls --human-readable --size -1 -S --classify'
+
+# move all files in subdirectories to current directory
+alias expose='find . -type f | while IFS= read -r file ; do mv -i < /dev/tty "$file" . ; done'
+
+# sanitize filenames
+alias sanitize='find . -type f | while IFS= read -r file ; do mv "$file" "${file%/*}/$(echo ${file##*/} | tr "[:upper:]" "[:lower:]" | tr " " "_")" ; done'
+
+# seeded password generator
+genpass () {    
+	website=$1 ; stty -echo ; read -p "Password: " password ; echo ; stty echo
+	echo "$password$website" | sha1sum - | cut -d" " -f1 | xxd -r -p | base64 | tr -d -c [:alnum:] | xclip -selection c
+}
+
