@@ -22,7 +22,7 @@ fi
 unset rc
 
 # set default terminal text editor
-export VISUAL=nvim
+export VISUAL=micro
 export EDITOR="${VISUAL}"
 
 # source custom aliases
