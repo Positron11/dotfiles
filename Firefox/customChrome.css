@@ -1,7 +1,7 @@
 /* darken tab strip background and add padding */
 #TabsToolbar {
 	background-color: var(--gnome-window-background) !important;
-	padding-bottom: 5px !important;
+	padding-bottom: 6px !important;
 }
 
 /* make flexible space smaller */
