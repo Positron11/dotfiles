@@ -1,9 +1,14 @@
-/* darken tab strip background and add padding */
+/* darken tab strip background and add padding below */
 #TabsToolbar {
 	background-color: var(--gnome-window-background) !important;
 	padding-bottom: 6px !important;
 }
 
+/* make + button same height as tabs */
+#tabbrowser-arrowscrollbox-periphery {
+  padding-top: 6px !important;
+}
+  
 /* make flexible space smaller */
 toolbar toolbarspring{
   -moz-box-flex: 40 !important;
