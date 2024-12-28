@@ -61,8 +61,5 @@ function __custom_prompt {
 # set directory truncation
 PROMPT_DIRTRIM=3
 
-#set prompt command
+# set prompt command
 PROMPT_COMMAND="__custom_prompt"
-
-# startup display
-[[ "$(cat /proc/$PPID/comm)" =~ "ptyxis-agent" ]] && macchina
