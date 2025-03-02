@@ -4,11 +4,11 @@
 	padding-bottom: 6px !important;
 }
 
-/* make + button same height as tabs */
-#tabbrowser-arrowscrollbox-periphery {
-  padding-top: 6px !important;
+/* style private window tab bar */
+#main-window[privatebrowsingmode] #TabsToolbar {
+	background-color: #2b183a !important;
 }
-  
+
 /* make flexible space smaller */
 toolbar toolbarspring{
   -moz-box-flex: 40 !important;
