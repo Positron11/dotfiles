@@ -63,3 +63,16 @@ PROMPT_DIRTRIM=3
 
 # set prompt command
 PROMPT_COMMAND="__custom_prompt"
+
+# set ctrl+r/t options for fzf
+export FZF_CTRL_R_OPTS="
+	--style full"
+
+export FZF_CTRL_T_OPTS="
+	--style full 
+	--walker-skip .git,node_modules,target
+	--preview 'bat -n --color=always {}'
+	--bind 'ctrl-/:change-preview-window(down|hidden|)'"
+
+# initialize fzf
+eval "$(fzf --bash)"
