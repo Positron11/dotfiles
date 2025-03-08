@@ -1,18 +1,3 @@
-# style codes
-DIM="\[\e[2m\]"
-BOLD="\[\e[1m\]"
-BLINK="\[\e[5m\]"
-
-RED="\[\e[31m\]"
-BLUE="\[\e[34m\]"
-CYAN="\[\e[36m\]"
-GREY="\[\e[90m\]"
-GREEN="\[\e[32m\]"
-YELLOW="\[\e[33m\]"
-MAGENTA="\[\e[35m\]"
-
-ENDSTYLE="\[\e[0m\]"
-
 # safer move and copy
 alias mv='mv -i'
 alias cp='cp -i'
@@ -25,9 +10,3 @@ alias expose='find . -type f | while IFS= read -r file ; do mv -i < /dev/tty "$f
 
 # sanitize filenames
 alias sanitize='find . -type f | while IFS= read -r file ; do mv "$file" "${file%/*}/$(echo ${file##*/} | tr "[:upper:]" "[:lower:]" | tr " " "_")" ; done'
-
-# seeded password generator
-genpass () {    
-	website=$1 ; stty -echo ; read -p "Password: " password ; echo ; stty echo
-	echo "$password$website" | sha1sum - | cut -d" " -f1 | xxd -r -p | base64 | tr -d -c [:alnum:] | xclip -selection c
-}

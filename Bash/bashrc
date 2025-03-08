@@ -1,16 +1,16 @@
-# Source global definitions
+# source global definitions
 if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-# User specific environment
+# user specific environment
 if ! [[ "${PATH}" =~ "${HOME}/.local/bin:${HOME}/bin:" ]]
 then
 	PATH="${HOME}/.local/bin:${HOME}/bin:${PATH}"
 fi
 export PATH
 
-# User specific aliases and functions
+# user specific aliases and functions
 if [ -d ~/.bashrc.d ]; then
 	for rc in ~/.bashrc.d/*; do
 		if [ -f "${rc}" ]; then
@@ -25,54 +25,5 @@ unset rc
 export VISUAL=micro
 export EDITOR="${VISUAL}"
 
-# source custom aliases
-source ~/.bash_aliases
-
-# source git
-source /usr/share/git-core/contrib/completion/git-prompt.sh
-
-# load prompt type
-if [ -f ~/.prompt_style ]; then
-	PROMPT_STYLE=$(<~/.prompt_style)
-fi
-
-# custom prompt
-function __custom_prompt {
-	# get exit code
-	EXIT_CODE="$?"
-	
-	# if running terminal in GUI
-	if [ "${TERM}\]" != "linux" ]; then			
-		# directory indicator
-		local DIRECTORY="$BOLD$BLUE[$RED\w$BLUE]$ENDSTYLE"
-	
-		# directory badges
-		local GIT=$([[ $(__git_ps1) ]] && echo " $BOLD$YELLOW($(__git_ps1 '%s'))$ENDSTYLE")
-		local VENV=$([[ $VIRTUAL_ENV != "" ]] && echo " $BOLD$MAGENTA($(basename $VIRTUAL_ENV))$ENDSTYLE")
-		
-		# exit code dependent head colouring
-		local HEAD="$BOLD$([[ ${EXIT_CODE} != 0 ]] && echo "$RED" || echo "$BOLD$GREEN"):$ENDSTYLE"
-		
-		# export bash prompt
-		export PS1="\n$DIRECTORY$GIT$VENV $HEAD "
-	fi
-}
-
-# set directory truncation
-PROMPT_DIRTRIM=3
-
-# set prompt command
-PROMPT_COMMAND="__custom_prompt"
-
-# set ctrl+r/t options for fzf
-export FZF_CTRL_R_OPTS="
-	--style full"
-
-export FZF_CTRL_T_OPTS="
-	--style full 
-	--walker-skip .git,node_modules,target
-	--preview 'bat -n --color=always {}'
-	--bind 'ctrl-/:change-preview-window(down|hidden|)'"
-
-# initialize fzf
-eval "$(fzf --bash)"
+# don't search for commands on failure
+unset command_not_found_handle
