@@ -13,9 +13,9 @@ rules:
     - default.todo.priority-c: ^\(C\)\B
 
     # tags
-    - default.todo.project: \B\+\w+(\s@\w+)?(\s\w+:[\w-]+)*$
-    - default.todo.context: \B@\w+(\s\w+:[\w-]+)*$
-    - default.todo.tags: \b(\s\w+:\w+)*$
+    - default.todo.project: \B\+[\w-]+(\s@[\w-]+)?(\s\w+:[\w-]+)*$
+    - default.todo.context: \B@[\w-]+(\s\w+:[\w-]+)*$
+    - default.todo.tags: \b(\s\w+:[\w-]+)*$
 
     # completed task
     - default.todo.done: ^x\s.*$
