@@ -1,0 +1,27 @@
+[[themes]]
+name = "clitify"
+
+[themes.component_style]
+# boxes
+block_title = { fg = "BrightBlack" }
+border = { fg = "BrightBlack" }
+
+# playback window
+playback_status = { fg = "Cyan" }
+playback_track = { fg = "Cyan", modifiers = ["Bold"] }
+playback_artists = { fg = "Cyan" }
+playback_album = { fg = "Yellow" }
+playback_metadata = { fg = "BrightBlack" }
+playback_progress_bar = { bg = "BrightBlack", fg = "Green" }
+
+# playlist window
+page_desc = { fg = "Green", modifiers = ["Bold"] }
+playlist_desc = { fg = "BrightBlack" }
+table_header = { fg = "Yellow" }
+current_playing = { fg = "Green", modifiers = ["Bold"] }
+
+# "like" heart icon
+like = { fg = "Red" }
+
+# lyrics page
+lyrics_played = { modifiers = ["Dim"] }
