@@ -40,7 +40,7 @@ while [ $i -lt $limit ]; do
     [[ ${#old_ids[@]} -eq ${#new_ids[@]} ]] || break
     
     let "i++"
-    sleep 0.15
+    sleep 0.25
 done
 
 
@@ -69,10 +69,10 @@ done
 
 # set dimensions
 SCREEN=(1920 1080)
-WINDOW=(1000 700)
+WINDOW=(1200 800)
 
 # compute top left corner coordinates
-COORDINATES=($(( (SCREEN[0] - WINDOW[0]) / 2 )) $(( (SCREEN[1] - WINDOW[1]) / 2 )))
+COORDINATES=($(( (SCREEN[0] - WINDOW[0]) / 2 )) $(( (SCREEN[1] - WINDOW[1]) / 2 + 12 )))
 
 # maximize the found window
 gdbus call --session --dest org.gnome.Shell \
