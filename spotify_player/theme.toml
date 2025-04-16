@@ -3,7 +3,7 @@ name = "clitify"
 
 [themes.component_style]
 # boxes
-block_title = { fg = "BrightBlack" }
+block_title = { fg = "White", modifiers = ["Bold"] }
 border = { fg = "BrightBlack" }
 
 # playback window
