@@ -15,3 +15,9 @@ toolbar toolbarspring{
   min-width: 10px !important;
   max-width: 100px !important;
 }
+
+/* hide tabbar scroolbox gradient - doesn't work well */
+#scrollbutton-up:has(~ scrollbox[orient="horizontal"]):not([disabled])::after,
+scrollbox[orient="horizontal"] ~ #scrollbutton-down:not([disabled])::after {
+  display: none;
+}
