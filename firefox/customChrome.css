@@ -1,23 +1,25 @@
-/* darken tab strip background and add padding below */
+ullscreen]) #TabsToolbar .titlebar-buttonbox-container {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
 #TabsToolbar {
-	background-color: var(--gnome-window-background) !important;
-	padding-bottom: 6px !important;
+	visibility: collapse !important;
 }
 
-/* style private window tab bar */
-#main-window[privatebrowsingmode] #TabsToolbar {
-	background-color: #2b183a !important;
-}
-
-/* make flexible space smaller */
-toolbar toolbarspring{
-  -moz-box-flex: 40 !important;
-  min-width: 10px !important;
+toolbarspring {
   max-width: 100px !important;
 }
 
-/* hide tabbar scroolbox gradient - doesn't work well */
-#scrollbutton-up:has(~ scrollbox[orient="horizontal"]):not([disabled])::after,
-scrollbox[orient="horizontal"] ~ #scrollbutton-down:not([disabled])::after {
+#back-button,
+#forward-button {
+ 	display: none !important;
+}
+
+#sidebar-header {
+ 	display: none;
+}
+
+#sidebar-splitter {
   display: none;
 }
