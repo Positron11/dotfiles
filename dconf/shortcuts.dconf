@@ -1,10 +1,10 @@
 [/]
 calculator=['<Alt>c']
 control-center=['<Alt>s']
-custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom6/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5/']
+custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']
 home=['<Alt>n']
 volume-step=5
-www=['<Alt>w']
+www=['<Alt>f']
 
 [custom-keybindings/custom0]
 binding='<Alt>t'
@@ -22,21 +22,6 @@ command='flatpak run com.github.finefindus.eyedropper'
 name='Eyedropper'
 
 [custom-keybindings/custom3]
-binding='Launch1'
+binding='<Alt>m'
 command='sysmon.sh'
 name='Monitor'
-
-[custom-keybindings/custom4]
-binding='<Alt>p'
-command='ptyxis --new-window --tab-with-profile=11a66a07add9ec5e97b7adb967a363d1'
-name='Spotify'
-
-[custom-keybindings/custom5]
-binding='<Alt>m'
-command='ptyxis --new-window --tab-with-profile=ad869312dc40be04b1a6ecd367b5d822'
-name='Micro'
-
-[custom-keybindings/custom6]
-binding='<Alt>f'
-command='ptyxis --new-window --tab-with-profile=7f5a24bd4e2eb42aadc430af676f8634'
-name='CLI File Manager'
