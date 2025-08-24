@@ -1,0 +1,17 @@
+#TabsToolbar {
+  visibility: collapse !important;
+}
+
+#back-button,
+#forward-button {
+ 	display: none !important;
+}
+
+#sidebar-main,
+#sidebar-panel-header {
+    display: none !important;
+}
+
+#sidebar-box {
+    padding-right: var(--space-small) !important;
+}
