@@ -1,29 +1,13 @@
 #!/bin/bash
 
-###########
-# PREPARE #
-###########
-
 # get ids of all existing ptyxis windows
 mapfile -t old_ids < <(gdbus call --session --dest org.gnome.Shell \
     --object-path /org/gnome/Shell/Extensions/Windows \
     --method org.gnome.Shell.Extensions.Windows.List \
     | head -c -4 | tail -c +3 | jq -c '.[] | select (.wm_class == "org.gnome.Ptyxis") | .id')
 
-
-
-#############
-# OPEN BTOP #
-#############
-
 # open new ptyxis with btop profile
 ptyxis --new-window --tab-with-profile 2a99a9e25efb1ca322ce793f67a8cff3 &
-
-
-
-#########################
-# SEARCH FOR NEW WINDOW #
-#########################
 
 # limit no. of tries to avoid inf. loop
 limit=1000
@@ -40,9 +24,8 @@ while [ $i -lt $limit ]; do
     [[ ${#old_ids[@]} -eq ${#new_ids[@]} ]] || break
     
     let "i++"
-    sleep 0.25
+    sleep 0.1
 done
-
 
 id=0
 found=false
@@ -61,12 +44,6 @@ for i in "${new_ids[@]}"; do
 	found=false
 done
 
-
-
-#########################
-# MAXIMIZE FOUND WINDOW #
-#########################
-
 # set dimensions
 SCREEN=(1920 1080)
 WINDOW=(1200 800)
@@ -77,5 +54,4 @@ COORDINATES=($(( (SCREEN[0] - WINDOW[0]) / 2 )) $(( (SCREEN[1] - WINDOW[1]) / 2 
 # maximize the found window
 gdbus call --session --dest org.gnome.Shell \
     --object-path /org/gnome/Shell/Extensions/Windows \
-    --method org.gnome.Shell.Extensions.Windows.MoveResize \
-    $id ${COORDINATES[0]} ${COORDINATES[1]} ${WINDOW[0]} ${WINDOW[1]}
+    --method org.gnome.Shell.Extensions.Windows.Maximize $id
