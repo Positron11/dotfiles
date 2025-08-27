@@ -1,10 +1,11 @@
 # set ctrl+r (command history) options
 export FZF_CTRL_R_OPTS="
-	--style full"
+	--height 10
+	--layout reverse"
 
 # set ctrl+t (file fuzzy finder) options
 export FZF_CTRL_T_OPTS="
-	--style full 
+	--style full
 	--walker-skip .git,node_modules,target
 	--preview 'bat -n --color=always {}'
 	--bind 'ctrl-/:change-preview-window(down|hidden|)'"
