@@ -2,9 +2,9 @@
   visibility: collapse !important;
 }
 
-#back-button,
-#forward-button {
- 	display: none !important;
+#browser:not(:has(#sidebar-splitter[hidden="true"])) #tabbrowser-tabbox {
+    border-top-right-radius: var(--border-radius-medium) !important;
+    overflow: hidden !important;
 }
 
 #sidebar-main,
