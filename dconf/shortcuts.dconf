@@ -1,7 +1,7 @@
 [/]
 calculator=['<Alt>c']
 control-center=['<Alt>s']
-custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']
+custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/']
 home=['<Alt>n']
 volume-step=5
 www=['<Alt>f']
@@ -23,5 +23,5 @@ name='Eyedropper'
 
 [custom-keybindings/custom3]
 binding='<Alt>m'
-command='sysmon.sh'
+command='ptyxis --new-window --maximize -x btop'
 name='Monitor'
