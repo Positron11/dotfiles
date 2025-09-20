@@ -1,17 +1,17 @@
-#TabsToolbar {
-  visibility: collapse !important;
+#browser:not(:has(#sidebar-splitter[hidden])) #tabbrowser-tabbox {
+  border-top-right-radius: var(--border-radius-medium) !important;
+  overflow: hidden !important;
 }
 
-#browser:not(:has(#sidebar-splitter[hidden="true"])) #tabbrowser-tabbox {
-    border-top-right-radius: var(--border-radius-medium) !important;
-    overflow: hidden !important;
+#TabsToolbar {
+	visibility: collapse !important;
+}
+
+#sidebar-box {
+	margin-right: 5px !important;
 }
 
 #sidebar-main,
 #sidebar-panel-header {
-    display: none !important;
-}
-
-#sidebar-box {
-    padding-right: var(--space-small) !important;
+	display: none !important;
 }
