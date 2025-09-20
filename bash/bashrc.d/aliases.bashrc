@@ -1,3 +1,6 @@
+# open
+alias open='xdg-open'
+
 # safer move and copy
 alias mv='mv -i'
 alias cp='cp -i'
