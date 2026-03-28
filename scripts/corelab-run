@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PARTITION="/sys/fs/cgroup/research.partition"
+
+usage() {
+    cat <<'EOF'
+Usage: corelab-run {fast|slow|all} -- <command ...>
+
+Modes:
+  fast    Run on the fast benchmark core only    (CPU 2)
+  slow    Run on the slow research cores only    (CPUs 6-8)
+  all     Run on the full research block         (CPU 2 and CPUs 6-8)
+
+Requires corelab-on to have been run with a compatible mode first.
+EOF
+}
+
+if [[ $# -eq 1 && ( "$1" == "-h" || "$1" == "--help" ) ]]; then
+    usage
+    exit 0
+fi
+
+if [[ "${EUID}" -ne 0 ]]; then
+    echo "Error: must be run as root." >&2
+    exit 1
+fi
+
+if [[ $# -lt 3 ]]; then
+    usage >&2
+    exit 1
+fi
+
+MODE="$1"
+shift
+
+if [[ "$1" != "--" ]]; then
+    usage >&2
+    exit 1
+fi
+shift
+
+case "${MODE}" in
+    fast)
+        TASKSET_CPUS="2"
+        THREADS="1"
+        ;;
+    slow)
+        TASKSET_CPUS="6-8"
+        THREADS="3"
+        ;;
+    all)
+        TASKSET_CPUS="2,6-8"
+        THREADS="4"
+        ;;
+    -h|--help)
+        usage
+        exit 0
+        ;;
+    *)
+        echo "Error: invalid mode '${MODE}'." >&2
+        usage >&2
+        exit 1
+        ;;
+esac
+
+if [[ ! -d "${PARTITION}" ]]; then
+    echo "Error: research partition not active. Run corelab-on first." >&2
+    exit 1
+fi
+
+# expand a cpuset spec like "2,6-8,14" into one CPU number per line
+expand_cpus() {
+    local spec="$1"
+    IFS=',' read -ra parts <<< "$spec"
+    for part in "${parts[@]}"; do
+        if [[ "$part" == *-* ]]; then
+            seq "${part%-*}" "${part#*-}"
+        else
+            echo "$part"
+        fi
+    done
+}
+
+PARTITION_CPUS=$(cat "${PARTITION}/cpuset.cpus")
+PARTITION_SET=$(expand_cpus "${PARTITION_CPUS}")
+
+for cpu in $(expand_cpus "${TASKSET_CPUS}"); do
+    if ! grep -qx "${cpu}" <<< "${PARTITION_SET}"; then
+        echo "Error: CPU ${cpu} required for '${MODE}' mode is not in the active partition (${PARTITION_CPUS})." >&2
+        exit 1
+    fi
+done
+
+CMD=( "$@" )
+RUN_AS_USER="${SUDO_USER:-$USER}"
+RUID=$(id -u "${RUN_AS_USER}")
+RGID=$(id -g "${RUN_AS_USER}")
+RUN_AS_HOME=$(getent passwd "${RUN_AS_USER}" | cut -d: -f6)
+
+echo
+echo "[corelab-run] Mode: ${MODE}"
+echo "[corelab-run] Taskset CPUs: ${TASKSET_CPUS}"
+echo "[corelab-run] Command: ${CMD[*]}"
+
+# Move into the partition cgroup and exec the command.
+# We use a subshell so that moving into the partition does not affect this
+# script's process. $BASHPID gives the subshell's actual PID (not $$, which
+# always refers to the top-level script).
+# setpriv drops root to the target user without invoking a PAM session,
+# so the process stays in the research partition cgroup.
+(
+    echo $BASHPID > "${PARTITION}/cgroup.procs"
+    
+	exec env \
+        HOME="${RUN_AS_HOME}" \
+        OMP_NUM_THREADS="${THREADS}" \
+        OPENBLAS_NUM_THREADS="${THREADS}" \
+        MKL_NUM_THREADS="${THREADS}" \
+        NUMEXPR_NUM_THREADS="${THREADS}" \
+        taskset -c "${TASKSET_CPUS}" \
+        setpriv --reuid="${RUID}" --regid="${RGID}" --init-groups \
+        -- "${CMD[@]}"
+)

@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PARTITION="/sys/fs/cgroup/research.partition"
+DEFAULT_GOVERNOR="powersave"
+
+usage() {
+    cat <<'EOF'
+Usage: corelab-off
+
+Tears down the isolated cpuset partition and returns all CPUs to the
+normal scheduler pool.
+EOF
+}
+
+if [[ "${EUID}" -ne 0 ]]; then
+    echo "Error: run as root." >&2
+    exit 1
+fi
+
+if [[ $# -gt 1 ]]; then
+    usage >&2
+    exit 1
+fi
+
+if [[ $# -eq 1 ]]; then
+    case "$1" in
+        -h|--help) usage; exit 0 ;;
+        *)
+            echo "Error: unexpected argument '$1'." >&2
+            usage >&2
+            exit 1
+            ;;
+    esac
+fi
+
+if [[ ! -d "${PARTITION}" ]]; then
+    echo "[corelab-off] No research partition found."
+else
+    # refuse if tasks are still running inside the partition
+    PIDS=$(cat "${PARTITION}/cgroup.procs" 2>/dev/null | tr '\n' ',' | sed 's/,$//' || true)
+
+	if [[ -n "${PIDS}" ]]; then
+        echo "Error: tasks still running in research partition (PIDs: ${PIDS})." >&2
+        echo "       Wait for them to finish or kill them first." >&2
+        exit 1
+    fi
+
+    echo "[corelab-off] Removing research partition"
+   
+    if ! grep -q cpuset /sys/fs/cgroup/cgroup.subtree_control; then
+        echo "+cpuset" > /sys/fs/cgroup/cgroup.subtree_control
+    fi
+   
+    echo "member" > "${PARTITION}/cpuset.cpus.partition"
+    
+	rmdir "${PARTITION}"
+fi
+
+echo "[corelab-off] Re-enabling boost"
+
+echo 1 > /sys/devices/system/cpu/cpufreq/boost
+
+echo "[corelab-off] Restoring governor: ${DEFAULT_GOVERNOR}"
+
+cpupower frequency-set -g "${DEFAULT_GOVERNOR}" > /dev/null
+
+echo "[corelab-off] Done"

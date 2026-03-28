@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PARTITION="/sys/fs/cgroup/research.partition"
+
+usage() {
+    cat <<'EOF'
+Usage: corelab-status
+
+Displays:
+  - research partition state (active/inactive and reserved CPUs)
+  - current shell CPU affinity
+  - CPU governor
+  - CPU boost state
+EOF
+}
+
+if [[ $# -gt 1 ]]; then
+    usage >&2
+    exit 1
+fi
+
+if [[ $# -eq 1 ]]; then
+    case "$1" in
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "Error: unexpected argument '$1'." >&2
+            usage >&2
+            exit 1
+            ;;
+    esac
+fi
+
+get_governor() {
+    local gov_file="/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
+    [[ -r "$gov_file" ]] && cat "$gov_file" || echo "unknown"
+}
+
+get_boost() {
+    local boost_file="/sys/devices/system/cpu/cpufreq/boost"
+    [[ -r "$boost_file" ]] && cat "$boost_file" || echo "unknown"
+}
+
+if [[ -d "${PARTITION}" ]]; then
+    PARTITION_CPUS=$(cat "${PARTITION}/cpuset.cpus" 2>/dev/null || echo "unknown")
+    PARTITION_STATE="active [${PARTITION_CPUS}]"
+    PARTITION_PIDS=$(cat "${PARTITION}/cgroup.procs" 2>/dev/null || true)
+else
+    PARTITION_STATE="inactive"
+    PARTITION_PIDS=""
+fi
+
+SHELL_ALLOWED="$(grep '^Cpus_allowed_list:' /proc/$$/status | awk '{print $2}' || echo 'unknown')"
+GOVERNOR="$(get_governor)"
+BOOST="$(get_boost)"
+
+echo
+echo "Research partition: ${PARTITION_STATE}"
+
+if [[ -n "${PARTITION_PIDS}" ]]; then
+    echo
+    echo "╭  PID     Command"
+    echo "│  ---     -------"
+	
+	while IFS= read -r pid; do
+        comm=$(cat "/proc/${pid}/comm" 2>/dev/null || echo "???")
+        echo "├  ${pid}  ${comm}"
+    done <<< "${PARTITION_PIDS}"
+fi
+
+echo
+echo " - shell.AllowedCPUs : ${SHELL_ALLOWED}"
+echo " - cpu.governor      : ${GOVERNOR}"
+echo " - cpu.boost         : ${BOOST}"
