@@ -57,12 +57,12 @@ else
 	rmdir "${PARTITION}"
 fi
 
-echo "[corelab-off] Re-enabling boost"
-
-echo 1 > /sys/devices/system/cpu/cpufreq/boost
-
 echo "[corelab-off] Restoring governor: ${DEFAULT_GOVERNOR}"
 
 cpupower frequency-set -g "${DEFAULT_GOVERNOR}" > /dev/null
+
+echo "[corelab-off] Re-enabling boost"
+
+echo 1 > /sys/devices/system/cpu/cpufreq/boost
 
 echo "[corelab-off] Done"
