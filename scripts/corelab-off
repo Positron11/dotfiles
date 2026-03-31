@@ -3,9 +3,10 @@ set -euo pipefail
 
 PARTITION="/sys/fs/cgroup/research.partition"
 DEFAULT_GOVERNOR="powersave"
+ALL_RESEARCH_CPUS="2,6-8,14,18-20"
 
 usage() {
-    cat <<'EOF'
+	cat <<'EOF'
 Usage: corelab-off
 
 Tears down the isolated cpuset partition and returns all CPUs to the
@@ -13,53 +14,44 @@ normal scheduler pool.
 EOF
 }
 
+# help before root check so it works without sudo.
+if [[ $# -eq 1 && ( "$1" == "-h" || "$1" == "--help" ) ]]; then
+	usage; exit 0
+fi
+
 if [[ "${EUID}" -ne 0 ]]; then
-    echo "Error: run as root." >&2
-    exit 1
+	echo "Error: run as root." >&2
+	exit 1
 fi
 
-if [[ $# -gt 1 ]]; then
-    usage >&2
-    exit 1
-fi
-
-if [[ $# -eq 1 ]]; then
-    case "$1" in
-        -h|--help) usage; exit 0 ;;
-        *)
-            echo "Error: unexpected argument '$1'." >&2
-            usage >&2
-            exit 1
-            ;;
-    esac
+if [[ $# -ne 0 ]]; then
+	echo "Error: unexpected argument '$1'." >&2
+	usage >&2; exit 1
 fi
 
 if [[ ! -d "${PARTITION}" ]]; then
-    echo "[corelab-off] No research partition found."
+	echo "[corelab-off] No research partition found."
 else
-    # refuse if tasks are still running inside the partition
-    PIDS=$(cat "${PARTITION}/cgroup.procs" 2>/dev/null | tr '\n' ',' | sed 's/,$//' || true)
+	PIDS=$(cat "${PARTITION}/cgroup.procs" 2>/dev/null | tr '\n' ',' | sed 's/,$//' || true)
 
 	if [[ -n "${PIDS}" ]]; then
-        echo "Error: tasks still running in research partition (PIDs: ${PIDS})." >&2
-        echo "       Wait for them to finish or kill them first." >&2
-        exit 1
-    fi
+		echo "Error: tasks still running in research partition (PIDs: ${PIDS})." >&2
+		echo "       Wait for them to finish or kill them first." >&2
+		exit 1
+	fi
 
-    echo "[corelab-off] Removing research partition"
-   
-    if ! grep -q cpuset /sys/fs/cgroup/cgroup.subtree_control; then
-        echo "+cpuset" > /sys/fs/cgroup/cgroup.subtree_control
-    fi
-   
-    echo "member" > "${PARTITION}/cpuset.cpus.partition"
-    
+	echo "[corelab-off] Removing research partition"
+
+	# demote from 'isolated' back to 'member' before rmdir —
+	# the kernel rejects rmdir on an 'isolated' partition.
+	echo "member" > "${PARTITION}/cpuset.cpus.partition"
 	rmdir "${PARTITION}"
 fi
 
 echo "[corelab-off] Restoring governor: ${DEFAULT_GOVERNOR}"
 
-cpupower frequency-set -g "${DEFAULT_GOVERNOR}" > /dev/null
+# match the scope set by corelab-on — only touch research CPUs.
+cpupower -c "${ALL_RESEARCH_CPUS}" frequency-set -g "${DEFAULT_GOVERNOR}" > /dev/null
 
 echo "[corelab-off] Re-enabling boost"
 

@@ -4,7 +4,7 @@ set -euo pipefail
 PARTITION="/sys/fs/cgroup/research.partition"
 
 usage() {
-    cat <<'EOF'
+	cat <<'EOF'
 Usage: corelab-status
 
 Displays:
@@ -15,60 +15,49 @@ Displays:
 EOF
 }
 
-if [[ $# -gt 1 ]]; then
-    usage >&2
-    exit 1
+if [[ $# -eq 1 && ( "$1" == "-h" || "$1" == "--help" ) ]]; then
+	usage; exit 0
 fi
 
-if [[ $# -eq 1 ]]; then
-    case "$1" in
-        -h|--help)
-            usage
-            exit 0
-            ;;
-        *)
-            echo "Error: unexpected argument '$1'." >&2
-            usage >&2
-            exit 1
-            ;;
-    esac
+if [[ $# -ne 0 ]]; then
+	echo "Error: unexpected argument '$1'." >&2
+	usage >&2; exit 1
 fi
 
 get_governor() {
-    local gov_file="/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
-    [[ -r "$gov_file" ]] && cat "$gov_file" || echo "unknown"
+	local f="/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
+	[[ -r "$f" ]] && cat "$f" || echo "unknown"
 }
 
 get_boost() {
-    local boost_file="/sys/devices/system/cpu/cpufreq/boost"
-    [[ -r "$boost_file" ]] && cat "$boost_file" || echo "unknown"
+	local f="/sys/devices/system/cpu/cpufreq/boost"
+	[[ -r "$f" ]] && cat "$f" || echo "unknown"
 }
 
 if [[ -d "${PARTITION}" ]]; then
-    PARTITION_CPUS=$(cat "${PARTITION}/cpuset.cpus" 2>/dev/null || echo "unknown")
-    PARTITION_STATE="active [${PARTITION_CPUS}]"
-    PARTITION_PIDS=$(cat "${PARTITION}/cgroup.procs" 2>/dev/null || true)
+	PARTITION_CPUS=$(cat "${PARTITION}/cpuset.cpus" 2>/dev/null || echo "unknown")
+	PARTITION_STATE="active [${PARTITION_CPUS}]"
+	PARTITION_PIDS=$(cat "${PARTITION}/cgroup.procs" 2>/dev/null || true)
 else
-    PARTITION_STATE="inactive"
-    PARTITION_PIDS=""
+	PARTITION_STATE="inactive"
+	PARTITION_PIDS=""
 fi
 
-SHELL_ALLOWED="$(grep '^Cpus_allowed_list:' /proc/$$/status | awk '{print $2}' || echo 'unknown')"
+# read CPU affinity of this process, which inherits from the invoking shell.
+SHELL_ALLOWED="$(grep '^Cpus_allowed_list:' "/proc/$$/status" | awk '{print $2}' || echo 'unknown')"
 GOVERNOR="$(get_governor)"
 BOOST="$(get_boost)"
 
-echo
 echo "Research partition: ${PARTITION_STATE}"
 
 if [[ -n "${PARTITION_PIDS}" ]]; then
-    echo
-    echo "╭  PID     Command"
-    echo "│  ---     -------"
-	
+	echo
+	echo -e "│  \e[4mPID\e[0m       \e[4mCommand\e[0m"
+   
 	while IFS= read -r pid; do
-        comm=$(cat "/proc/${pid}/comm" 2>/dev/null || echo "???")
-        echo "├  ${pid}  ${comm}"
-    done <<< "${PARTITION_PIDS}"
+		comm=$(cat "/proc/${pid}/comm" 2>/dev/null || echo "???")
+		printf "├→ %-8s  %s\n" "$pid" "$comm"
+	done <<< "${PARTITION_PIDS}"
 fi
 
 echo

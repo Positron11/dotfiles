@@ -7,7 +7,7 @@ ALL_RESEARCH_CPUS="2,6-8,14,18-20"
 PARTITION="/sys/fs/cgroup/research.partition"
 
 usage() {
-    cat <<'EOF'
+	cat <<'EOF'
 Usage: corelab-on {fast|slow|all}
 
 Modes:
@@ -20,57 +20,64 @@ available to research tasks and cannot be used by any other process.
 EOF
 }
 
+# help before root check so it works without sudo.
+if [[ $# -eq 1 && ( "$1" == "-h" || "$1" == "--help" ) ]]; then
+	usage; exit 0
+fi
+
 if [[ "${EUID}" -ne 0 ]]; then
-    echo "Error: run as root." >&2
-    exit 1
+	echo "Error: run as root." >&2
+	exit 1
 fi
 
 if [[ $# -ne 1 ]]; then
-    usage >&2
-    exit 1
+	usage >&2; exit 1
 fi
 
 case "$1" in
-    fast)  RESEARCH_CPUS="${FAST_CPUS}" ;;
-    slow)  RESEARCH_CPUS="${SLOW_CPUS}" ;;
-    all)  RESEARCH_CPUS="${ALL_RESEARCH_CPUS}" ;;
-    -h|--help) usage; exit 0 ;;
-    *)
-        echo "Error: invalid mode '$1'." >&2
-        usage >&2
-        exit 1
-        ;;
+	fast) RESEARCH_CPUS="${FAST_CPUS}" ;;
+	slow) RESEARCH_CPUS="${SLOW_CPUS}" ;;
+	all)  RESEARCH_CPUS="${ALL_RESEARCH_CPUS}" ;;
+	*)
+		echo "Error: invalid mode '$1'." >&2
+		usage >&2; exit 1
+		;;
 esac
 
 if [[ -d "${PARTITION}" ]]; then
-    echo "Error: research partition already active. Run corelab-off first." >&2
-    exit 1
+	echo "Error: research partition already active. Run corelab-off first." >&2
+	exit 1
 fi
 
-_on_err() {
-    echo "[corelab-on] Error: cleaning up partial partition" >&2
-    echo "member" > "${PARTITION}/cpuset.cpus.partition" 2>/dev/null || true
-    rmdir "${PARTITION}" 2>/dev/null || true
+# on any error, demote the partition back to 'member' before removing it —
+# the kernel rejects rmdir on an 'isolated' partition.
+_cleanup() {
+	echo "[corelab-on] Error — rolling back" >&2
+	echo "member" > "${PARTITION}/cpuset.cpus.partition" 2>/dev/null || true
+	rmdir "${PARTITION}" 2>/dev/null || true
 }
 
-trap _on_err ERR
+trap _cleanup ERR
 
 echo "[corelab-on] Creating isolated cpuset partition: ${RESEARCH_CPUS}"
 
+# the cpuset controller must be enabled at the root cgroup before
+# child cgroups can use it.
 if ! grep -q cpuset /sys/fs/cgroup/cgroup.subtree_control; then
-    echo "+cpuset" > /sys/fs/cgroup/cgroup.subtree_control
+	echo "+cpuset" > /sys/fs/cgroup/cgroup.subtree_control
 fi
 
 mkdir "${PARTITION}"
-
 echo "${RESEARCH_CPUS}" > "${PARTITION}/cpuset.cpus"
-echo "0" > "${PARTITION}/cpuset.mems"
-echo "isolated" > "${PARTITION}/cpuset.cpus.partition"
+echo "0"               > "${PARTITION}/cpuset.mems"
+echo "isolated"        > "${PARTITION}/cpuset.cpus.partition"
 
 echo "[corelab-on] Setting performance governor and disabling boost"
 
-cpupower frequency-set -g performance > /dev/null
+# apply only to research CPUs; leave other cores on their current governor.
+cpupower -c "${ALL_RESEARCH_CPUS}" frequency-set -g performance > /dev/null
 
+# boost (turbo) is a system-wide toggle on AMD — no per-CPU granularity.
 echo 0 > /sys/devices/system/cpu/cpufreq/boost
 
 echo "[corelab-on] Done"
