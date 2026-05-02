@@ -10,5 +10,10 @@ export FZF_CTRL_T_OPTS="
 	--preview 'bat -n --color=always {}'
 	--bind 'ctrl-/:change-preview-window(down|hidden|)'"
 
+# set alt+c (directory finder) options
+export FZF_ALT_C_OPTS="
+  --height 10
+  --layout reverse"
+
 # initialize fzf
 eval "$(fzf --bash)"
