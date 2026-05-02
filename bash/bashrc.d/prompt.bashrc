@@ -1,35 +1,58 @@
-# source git
-source /usr/share/git-core/contrib/completion/git-prompt.sh
-
-# load prompt type
-if [ -f ~/.prompt_style ]; then
-	PROMPT_STYLE=$(<~/.prompt_style)
-fi
-
-# prompt function
-function __custom_prompt {
-	# get exit code
-	EXIT_CODE="$?"
+_fmt_duration() {
+	local duration=$1
 	
-	# if running terminal in GUI
-	if [ "${TERM}\]" != "linux" ]; then			
-		# directory indicator
-		local DIRECTORY="\[${BOLD}\]\[${BLUE}\][\[${RED}\]\w\[${BLUE}\]]\[${ENDSTYLE}\]"
+	local -i ms=$(( ${duration%.*} * 1000 + 10#${duration#*.} / 1000 ))
+	local -i secs=${duration%.*}
+   
+	if   (( ms < 1000 )); then printf '%dms' "$ms"
+	elif (( secs < 60 )); then printf '%.1fs' "$duration"
 	
-		# directory badges
-		local GIT=$([[ $(__git_ps1) ]] && echo " \[${BOLD}\]\[${YELLOW}\]($(__git_ps1 '%s'))\[${ENDSTYLE}\]")
-		local VENV=$([[ $VIRTUAL_ENV != "" ]] && echo " \[${BOLD}\]\[${MAGENTA}\]($(basename ${VIRTUAL_ENV}))\[${ENDSTYLE}\]")
+	else 
+		mins=$(( secs / 60 ))
+		rem=$(( secs % 60 ))
 		
-		# exit code dependent head colouring
-		local HEAD="\[${BOLD}\]$([[ $EXIT_CODE != 0 ]] && echo "\[${RED}\]" || echo "\[${GREEN}\]"):\[${ENDSTYLE}\]"
-		
-		# export bash prompt
-		export PS1="\n${DIRECTORY}${GIT}${VENV} ${HEAD} "
+		printf '%dm%ds' "$mins" "$rem"
 	fi
 }
 
-# set directory truncation
-PROMPT_DIRTRIM=3
+preexec_timer() {
+	[[ "$BASH_COMMAND" == "$PROMPT_COMMAND" ]] && return
+	_cmd_start=$EPOCHREALTIME
+}
 
-# set prompt command
-PROMPT_COMMAND="__custom_prompt"
+prompt_command() {
+	local ret=$?
+	local status="${RED}${BOLD}${ret}${ENDSTYLE}"
+	
+	(( ret == 0 )) && status="${GREEN}${BOLD}OK${ENDSTYLE}"
+	
+	local ts=$(date +%H:%M:%S)
+
+	if [[ -n "$_cmd_start" ]]; then
+		_cmd_time=$(awk "BEGIN{print $EPOCHREALTIME - $_cmd_start}")
+		unset _cmd_start
+	fi
+	
+	local venv=""
+
+	[[ -n "$VIRTUAL_ENV" ]] && venv="${VIRTUAL_ENV##*/}: "
+	
+	local branch=$(git branch --show-current 2>/dev/null)
+	local git=""
+	
+	[[ -n "$branch" ]] && git=" (${branch})"
+
+	PS1="
+┌ ${status} ${DIM}${ts} - $(_fmt_duration ${_cmd_time:-0})${ENDSTYLE}
+│ ${venv}${UNDERLINE}\w${ENDSTYLE}${git}
+│
+╰─>>> "
+}
+
+# pre-execution hook for timer start
+trap 'preexec_timer' DEBUG
+
+# newline between prompt and output
+PS0='\n'
+
+PROMPT_COMMAND=prompt_command
